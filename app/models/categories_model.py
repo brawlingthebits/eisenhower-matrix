@@ -11,14 +11,13 @@ class CategoriesModel(db.Model):
 
     __tablename__ = "categories"
 
-    keys = {"name, description"}
+    keys = {"name", "description"}
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
     description = Column(Text)
-
     tasks = relationship(
-                        "TaskModel", 
+                        "TasksModel", 
                         secondary="tasks_categories", 
                         backref=backref(name="categories")
                         )
