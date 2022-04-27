@@ -1,8 +1,8 @@
-"""feat: create all required models and named tables
+"""empty message
 
-Revision ID: 2f55ecd0f912
+Revision ID: 360fd94e582c
 Revises: 
-Create Date: 2022-04-22 16:08:11.108778
+Create Date: 2022-04-27 12:36:47.578020
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2f55ecd0f912'
+revision = '360fd94e582c'
 down_revision = None
 branch_labels = None
 depends_on = None

@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from marshmallow import validates
 from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from app.configs.database import db
+from app.models.tasks_categories_table import tasks_categories
+from sqlalchemy.orm import relationship
 
 @dataclass
 class TasksModel(db.Model):
@@ -26,6 +28,11 @@ class TasksModel(db.Model):
                             Integer, 
                             ForeignKey("eisenhower.id")
                         )
+    categories = relationship(
+            "CategoriesModel", 
+            secondary=tasks_categories, 
+            backref="tasks"
+        )
 
     @classmethod
     def eisenhower_type(cls, importance, urgency):
