@@ -1,6 +1,8 @@
 from http import HTTPStatus
 from flask import jsonify, request
+from sqlalchemy.exc import DataError, IntegrityError, NoResultFound
 from app.configs.database import db
+from app.exceptions.keys_exceptions import MissingKeys
 from app.models.categories_model import CategoriesModel
 from app.models.eisenhowers_model import EisenhowersModel
 from app.models.tasks_model import TasksModel
@@ -54,9 +56,56 @@ def create_task():
         
     except KeyError as e:
         return e.args[0], HTTPStatus.BAD_REQUEST
+    
+    except MissingKeys as e:
+        e.args[0], HTTPStatus.BAD_REQUEST
 
-def update_task(id):
-    ...
+    except IntegrityError:
+        return {"error": "Task already exists"}, HTTPStatus.CONFLICT
 
-def delete_task(id):
-    ...
+def update_task(task_id: int):
+    task_data = request.get_json()
+
+    try:
+        data_to_update = TasksModel.query.filter_by(id=task_id).one_or_none()
+
+        if data_to_update == None:
+            return {"error": "Category not found"}, HTTPStatus.BAD_REQUEST
+        
+
+        for key, value in task_data.items():
+            setattr(data_to_update, key, value) 
+        
+        type_eisenhower = TasksModel.eisenhower_type(task_data.importance, task_data.urgency)
+        eisenhower = EisenhowersModel.query.filter_by(type=type_eisenhower).first()
+        task_data["eisenhower_id"] = eisenhower.id
+        
+        db.session.add(data_to_update)
+        db.session.commit()
+        
+        return jsonify({
+            "id": task_data.id,
+            "name": task_data.name,
+            "duration": task_data.duration,
+            "classification": eisenhower.type,
+            "categories": [category.name for category in task_data.categories]
+        }), HTTPStatus.OK
+
+
+    except DataError:
+        return {"error": "Id must be an integer"}, HTTPStatus.BAD_REQUEST
+        
+    except IntegrityError:
+        return {"error": "Task already exists"}, HTTPStatus.CONFLICT
+
+def delete_task(task_id: int):
+    try: 
+        data_to_delete = TasksModel.query.filter_by(id=task_id).first()
+        
+        db.session.delete(data_to_delete)
+        db.session.commit()
+
+        return "", HTTPStatus.OK
+
+    except NoResultFound:
+        return {"error": "Id not found"}, HTTPStatus.BAD_REQUEST

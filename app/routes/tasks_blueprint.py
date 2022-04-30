@@ -4,5 +4,5 @@ from flask import Blueprint
 bp_tasks = Blueprint("bp_tasks", __name__, url_prefix="/tasks")
 
 bp_tasks.post("")(create_task)
-bp_tasks.patch("<int:id>")(update_task)
-bp_tasks.delete("<id>")(delete_task)
+bp_tasks.patch("/<int:task_id>")(update_task)
+bp_tasks.delete("/<int:task_id>")(delete_task)
